@@ -4,7 +4,6 @@ import LandingPage from "@/polymet/pages/landing-page";
 import ScanResults from "@/polymet/pages/scan-results";
 import ScanLoadingPage from "@/polymet/pages/scan-loading-page";
 import InstructionsPromo from "@/polymet/pages/instructions-promo";
-import SeoPromoPage from "@/polymet/pages/seo-promo-page";
 import BookingPage from "@/polymet/pages/booking-page";
 
 export default function MainPrototype() {
@@ -43,15 +42,6 @@ export default function MainPrototype() {
           element={
             <MainLayout>
               <InstructionsPromo />
-            </MainLayout>
-          }
-        />
-
-        <Route
-          path="/seo-service"
-          element={
-            <MainLayout>
-              <SeoPromoPage />
             </MainLayout>
           }
         />
