@@ -237,7 +237,7 @@ const runScan = async (scanId, url) => {
 const createStandardIssues = (jurisdiction) => {
   console.log(`[ISSUES DEBUG] Creating standard issues for jurisdiction: ${jurisdiction}`);
   
-  return [
+  const issues = [
     {
       id: 'a11y-1',
       title: 'Missing alt text on images',
@@ -251,8 +251,8 @@ const createStandardIssues = (jurisdiction) => {
       title: 'Privacy policy link not prominently displayed',
       description: 'Privacy policy should be easily accessible',
       severity: 'medium',
-      legalReference: jurisdiction === 'Australia' ? 'Australian Privacy Principles' : 
-                    jurisdiction === 'European Union' ? 'GDPR Article 13' : 'CCPA',
+      legalReference: jurisdiction.includes('Australia') ? 'Australian Privacy Principles' : 
+                    jurisdiction.includes('European Union') ? 'GDPR Article 13' : 'CCPA',
       penalty: 'Regulatory fines and penalties'
     },
     {
@@ -271,32 +271,62 @@ const createStandardIssues = (jurisdiction) => {
       legalReference: 'State Bar Rules',
       penalty: 'Ethics violations and disciplinary action'
     },
-    // Add AI-related issues that should appear for all jurisdictions
+    // Improved AI-related issues with more detail
     {
       id: 'ai-1',
       title: 'AI-generated content without disclosure',
-      description: 'Content appears to be AI-generated without proper disclosure',
+      description: 'Content appears to be AI-generated without proper disclosure, which may violate legal ethics rules requiring transparency',
       severity: 'medium',
-      legalReference: jurisdiction === 'Australia' ? 'Australian Legal Practice Rules' : 'ABA Model Rules',
-      penalty: 'Ethical violations and potential misleading conduct'
+      legalReference: jurisdiction.includes('Australia') ? 'Australian Legal Practice Rules' : 'ABA Model Rules 7.1 (Communications Concerning a Lawyer\'s Services)',
+      penalty: 'Ethical violations, bar discipline, and potential misleading conduct claims'
     },
+    // New AI-related issue with more specificity
+    {
+      id: 'ai-2',
+      title: 'AI content disclosure needs improvement',
+      description: 'AI content disclosure exists but is not sufficiently prominent or clear, potentially misleading clients',
+      severity: 'low',
+      legalReference: jurisdiction.includes('California') ? 'California Business and Professions Code §17940-17943' : 'State Bar Advertising Rules',
+      penalty: 'Potential ethics complaints and regulatory scrutiny'
+    },
+    // More detailed plagiarism issue
     {
       id: 'plagiarism-1',
       title: 'Suspected plagiarized content',
-      description: 'Some blog content appears to be copied from other sources',
+      description: 'Blog content contains passages that appear verbatim on other websites without proper attribution',
       severity: 'high',
-      legalReference: 'Copyright Law',
-      penalty: 'Copyright infringement claims and damages'
+      legalReference: 'Copyright Law and Professional Ethics Rules',
+      penalty: 'Copyright infringement claims, damages, and professional discipline'
+    },
+    // Additional plagiarism issue with more detail
+    {
+      id: 'plagiarism-2',
+      title: 'Copied legal information without attribution',
+      description: 'Legal information appears to be copied from authoritative sources without proper citation',
+      severity: 'medium',
+      legalReference: 'Copyright Fair Use Doctrine & Professional Ethics',
+      penalty: 'Potential copyright claims and ethics violations'
     },
     {
       id: 'email-1',
       title: 'Missing unsubscribe option',
       description: 'Marketing emails must include clear unsubscribe options',
       severity: 'medium',
-      legalReference: jurisdiction === 'Australia' ? 'Spam Act 2003' : 'CAN-SPAM Act',
+      legalReference: jurisdiction.includes('Australia') ? 'Spam Act 2003' : 'CAN-SPAM Act',
       penalty: 'Regulatory fines and penalties'
+    },
+    // New issue for legal-specific compliance
+    {
+      id: 'legal-1',
+      title: 'Missing attorney state bar information',
+      description: 'Attorney websites should display state bar numbers and admission information',
+      severity: 'high',
+      legalReference: jurisdiction.includes('California') ? 'California Rules of Professional Conduct 7.1-7.5' : 'State Bar Rules',
+      penalty: 'Ethics violations and bar association discipline'
     }
   ];
+  
+  return issues;
 };
 
 // API Routes
