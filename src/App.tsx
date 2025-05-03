@@ -1,16 +1,34 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ScanForm } from './components/ScanForm';
 import { ScanResults } from './components/ScanResults';
 import { ExportResults } from './components/ExportResults';
 import { useScanApi } from './hooks/useScanApi';
+import PolymetScanResults from './polymet/pages/scan-results';
+import LandingPage from './polymet/pages/landing-page';
+import ScanLoadingPage from './polymet/pages/scan-loading-page';
+import InstructionsPromo from './polymet/pages/instructions-promo';
+import BookingPage from './polymet/pages/booking-page';
+
+// Log routing configuration
+console.log("[DEBUG] App.tsx is initializing with routes");
 
 function App() {
   const { startScan, isLoading, scanId, error, scanResult, isFetchingResults } = useScanApi();
 
+  console.log("[DEBUG] App rendering with useScanApi state:", { 
+    isLoading, 
+    hasScanId: !!scanId, 
+    hasError: !!error, 
+    hasResult: !!scanResult 
+  });
+
   const handleScanSubmit = async (url: string) => {
     try {
+      console.log("[DEBUG] handleScanSubmit called with URL:", url);
       await startScan(url);
     } catch (error) {
+      console.error("[ERROR] Error in handleScanSubmit:", error);
       // Error is already handled by the hook
     }
   };
@@ -114,7 +132,7 @@ function App() {
     return null;
   };
 
-  return (
+  const HomePage = () => (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="text-center">
@@ -132,6 +150,28 @@ function App() {
         </div>
       </div>
     </div>
+  );
+
+  // Log when the component renders routes
+  console.log("[DEBUG] App.tsx rendering Routes");
+  console.log("[DEBUG] Routes being defined:", [
+    { path: "/", component: "LandingPage" },
+    { path: "/scan-results", component: "PolymetScanResults" },
+    { path: "/scan-loading", component: "ScanLoadingPage" },
+    { path: "/instructions-promo", component: "InstructionsPromo" },
+    { path: "/booking", component: "BookingPage" }
+  ]);
+
+  return (
+    <Router basename="/">
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/scan-results" element={<PolymetScanResults />} />
+        <Route path="/scan-loading" element={<ScanLoadingPage />} />
+        <Route path="/instructions-promo" element={<InstructionsPromo />} />
+        <Route path="/booking" element={<BookingPage />} />
+      </Routes>
+    </Router>
   );
 }
 

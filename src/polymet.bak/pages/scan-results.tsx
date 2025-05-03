@@ -1,26 +1,85 @@
 import React from "react";
-import { COMPLIANCE_SCAN_RESULTS } from "@/polymet/data/compliance-scan-results-data";
-import AuroraBackground from "@/polymet/components/aurora-background";
-import WebsiteScreenshotPreview from "@/polymet/components/website-screenshot-preview";
-import GetFreeInstructionsSection from "@/polymet/components/get-free-instructions-section";
-import GetReportSection from "@/polymet/components/get-report-section";
-import RequiredActionItem from "@/polymet/components/required-action-item";
-import ComplianceSection from "@/polymet/components/compliance-section";
+import { useNavigate } from "react-router-dom";
+import AuroraBackground from "../components/aurora-background";
+import WebsiteScreenshotPreview from "../components/website-screenshot-preview";
+import GetFreeInstructionsSection from "../components/get-free-instructions-section";
+import GetReportSection from "../components/get-report-section";
+import RequiredActionItem from "../components/required-action-item";
+import ComplianceSection from "../components/compliance-section";
+
+// Get scan results from sessionStorage
+const stored = sessionStorage.getItem('scanResults');
+const scanResult = stored ? JSON.parse(stored) : null;
 
 export default function ScanResults() {
-  const {
-    url,
-    jurisdiction,
-    summary,
-    screenshot,
-    requiredActions,
-    sections,
-    issuesCount,
-  } = COMPLIANCE_SCAN_RESULTS;
+  const navigate = useNavigate();
 
-  if (!sections || !Array.isArray(sections)) {
-    return <div>No scan results found</div>;
+  // Destructure all fields with fallbacks
+  const {
+    url = '',
+    jurisdiction = 'Not specified',
+    summary = { totalIssues: 0 },
+    screenshot = '',
+    issues = [],
+    barAssociation = 'Not specified'
+  } = scanResult || {};
+
+  if (!scanResult) {
+    return (
+      <section className="text-center py-8">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">No Scan Results Found</h2>
+        <button
+          onClick={() => navigate("/")}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Start New Scan
+        </button>
+      </section>
+    );
   }
+
+  const score = Math.max(0, 100 - summary.totalIssues * 10);
+  const issuesCount = summary.totalIssues;
+  const complianceLabel = score === 100 ? "Compliant" : score >= 60 ? "Partially compliant" : "Non-compliant";
+
+  // Group issues by type for compliance sections
+  const sections = [
+    {
+      id: "critical",
+      title: "Critical Issues",
+      score: score,
+      items: issues.filter(issue => issue.severity === "Critical").map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        status: "missing",
+        info: issue.description
+      }))
+    },
+    {
+      id: "serious",
+      title: "Serious Issues",
+      score: score,
+      items: issues.filter(issue => issue.severity === "Serious").map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        status: "missing",
+        info: issue.description
+      }))
+    }
+  ];
+
+  // Required actions from critical and serious issues
+  const requiredActions = {
+    score: score,
+    items: issues
+      .filter(issue => ["Critical", "Serious"].includes(issue.severity))
+      .map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        severity: issue.severity === "Critical" ? "high" : "medium"
+      }))
+  };
 
   return (
     <AuroraBackground>
@@ -39,7 +98,7 @@ export default function ScanResults() {
           <div className="flex justify-center mt-8 mb-3">
             <div className="bg-white/10 backdrop-blur-sm px-5 py-2 rounded-full flex items-center">
               <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center mr-2 text-blue-900 font-bold">
-                A
+                {url[0]?.toUpperCase() || 'W'}
               </div>
               <span className="text-white font-medium text-base sm:text-lg">
                 {url}
@@ -47,41 +106,33 @@ export default function ScanResults() {
             </div>
           </div>
 
-          {/* Compliance Score, left-aligned and smaller, shifted right 20px */}
+          {/* Compliance Score */}
           <div className="flex justify-start mb-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-red-500 ml-5">
-              33% <span className="text-lg sm:text-xl">Compliance Score</span>
+              {score}% <span className="text-lg sm:text-xl">Compliance Score</span>
             </h1>
           </div>
 
           {/* Main Results Container */}
-          <div className="bg-white rounded-xl shadow-lg p-3 sm:p-5 mb-4 flex flex-col md:flex-row gap-4 sm:gap-6 items-stretch">
-            {/* Screenshot - smaller, responsive */}
-            <div className="w-full md:w-5/12 flex flex-col justify-center">
-              <div className="border rounded-lg overflow-hidden">
-                <div className="bg-gray-100 px-2 py-1 flex items-center">
-                  <div className="flex gap-1 mr-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-xs text-gray-600 truncate">{url}</span>
-                </div>
-                <img
-                  src={screenshot}
-                  alt="Website screenshot"
-                  className="w-full max-h-[140px] sm:max-h-[180px] md:max-h-[200px] object-cover"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Screenshot Preview */}
+            {screenshot && (
+              <div className="w-full md:w-5/12">
+                <WebsiteScreenshotPreview
+                  url={url}
+                  screenshot={screenshot}
+                  altText={`Screenshot of ${url}`}
                 />
               </div>
-            </div>
+            )}
 
-            {/* Non-compliant area */}
+            {/* Results Summary */}
             <div className="w-full md:w-7/12 flex flex-col justify-center">
               <div className="flex flex-col items-center md:items-start justify-center h-full">
-                {/* Pill-shaped Non-compliant badge */}
+                {/* Compliance status badge */}
                 <span className="inline-flex items-center px-5 py-2 mb-2 rounded-full bg-red-50 border border-red-200">
                   <span className="text-red-600 font-semibold text-lg mr-2">
-                    Non-compliant
+                    {complianceLabel}
                   </span>
                   <svg
                     className="w-5 h-5 text-red-500 mr-2"
@@ -100,16 +151,22 @@ export default function ScanResults() {
                     {issuesCount} compliance issues identified
                   </span>
                 </span>
-                {/* Jurisdiction - larger */}
+
+                {/* Jurisdiction and Bar Association */}
                 <div className="text-gray-800 text-lg font-bold mb-2 mt-1">
                   Jurisdiction:{" "}
-                  <span className="text-blue-900">{jurisdiction}</span>
+                  <span className="text-blue-900">
+                    {jurisdiction}
+                  </span>
                 </div>
-                {/* Summary */}
-                <div className="text-gray-700 text-base mb-4 leading-snug max-w-lg text-center md:text-left">
-                  {summary}
+                <div className="text-gray-800 text-lg font-bold mb-2">
+                  Bar Association:{" "}
+                  <span className="text-blue-900">
+                    {barAssociation}
+                  </span>
                 </div>
-                {/* Fix These Problems Button */}
+
+                {/* Fix Problems Button */}
                 <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-full text-base shadow transition mb-0">
                   Fix These Problems
                 </button>
@@ -117,7 +174,7 @@ export default function ScanResults() {
             </div>
           </div>
 
-          {/* Button containers with border and space below */}
+          {/* Action Buttons */}
           <div className="relative z-20 grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="border border-gray-200 rounded-xl bg-white">
               <GetFreeInstructionsSection />
@@ -128,15 +185,14 @@ export default function ScanResults() {
           </div>
         </div>
 
-        {/* Edge-to-edge light grey housing container for everything under the button containers */}
+        {/* Results Details Section */}
         <div
           className="w-full bg-gray-50 pt-12 pb-1 relative z-10"
           style={{
-            marginTop: "-96px", // Bring this up so it sits halfway behind the button containers
+            marginTop: "-96px",
           }}
         >
           <div className="container mx-auto px-2 sm:px-4 md:px-8 max-w-7xl">
-            {/* Add a clear gap between button containers and required actions */}
             <div className="h-8"></div>
 
             {/* Required Actions Section */}
@@ -148,7 +204,7 @@ export default function ScanResults() {
                 </div>
               </div>
               <div className="space-y-3">
-                {requiredActions.items.map((action, index) => (
+                {requiredActions.items.map((action) => (
                   <RequiredActionItem
                     key={action.id}
                     title={action.title}
@@ -162,7 +218,7 @@ export default function ScanResults() {
 
             {/* Compliance Sections */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {sections.map((section, index) => (
+              {sections.map((section) => (
                 <ComplianceSection
                   key={section.id}
                   title={section.title}
@@ -176,4 +232,4 @@ export default function ScanResults() {
       </div>
     </AuroraBackground>
   );
-}
+} 

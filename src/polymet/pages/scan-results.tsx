@@ -60,6 +60,18 @@ export default function ScanResults() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Handle navigation to instructions page
+  const handleFixProblems = () => {
+    console.log('[DEBUG] Navigating to instructions-promo page');
+    navigate('/instructions-promo');
+  };
+
+  // Handle navigation to booking page
+  const handleGetHelp = () => {
+    console.log('[DEBUG] Navigating to booking page');
+    navigate('/booking');
+  };
+
   useEffect(() => {
     console.log('[DEBUG] ScanResults useEffect running');
     
@@ -553,7 +565,10 @@ export default function ScanResults() {
                   {typeof summary === 'string' ? summary : summary?.jurisdictionNote || 'Your website has compliance issues that need to be addressed.'}
                 </div>
                 {/* Fix These Problems Button */}
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-full text-base shadow transition mb-0">
+                <button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-full text-base shadow transition mb-0"
+                  onClick={handleFixProblems}
+                >
                   Fix These Problems
                 </button>
               </div>
@@ -563,7 +578,7 @@ export default function ScanResults() {
           {/* Button containers with border and space below */}
           <div className="relative z-20 grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="border border-gray-200 rounded-xl bg-white">
-              <GetFreeInstructionsSection />
+              <GetFreeInstructionsSection onFixProblems={handleFixProblems} />
             </div>
             <div className="border border-gray-200 rounded-xl bg-white">
               <GetReportSection />
@@ -598,7 +613,7 @@ export default function ScanResults() {
                       title={action.title}
                       description={action.description}
                       severity={action.severity}
-                      onGetHelp={() => {}}
+                      onGetHelp={handleGetHelp}
                     />
                   ))}
                 </div>
