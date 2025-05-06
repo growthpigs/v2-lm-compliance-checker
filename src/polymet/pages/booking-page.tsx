@@ -123,10 +123,10 @@ export default function BookingPage() {
 
                 {currentStep === 1 ? (
                   <div className="space-y-8">
-                    {/* Calendar Embed */}
+                    {/* TidyCal Embed */}
                     <div className="w-full min-h-[400px] rounded-lg overflow-hidden">
                       <iframe
-                        src="https://calendly.com/YOUR_USERNAME/20min"
+                        src="https://tidycal.com/quick-chat/quick-chat-with-jonathan"
                         width="100%"
                         height="100%"
                         frameBorder="0"
