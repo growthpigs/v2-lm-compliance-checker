@@ -1,0 +1,11 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = WebsiteScreenshotPreview;
+const jsx_runtime_1 = require("react/jsx-runtime");
+const image_1 = __importDefault(require("next/image"));
+function WebsiteScreenshotPreview({ url, screenshotUrl, className = "", }) {
+    return ((0, jsx_runtime_1.jsxs)("div", { className: `bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm ${className}`, children: [(0, jsx_runtime_1.jsxs)("div", { className: "bg-gray-100 dark:bg-gray-700 p-2 flex items-center", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex space-x-1.5 mr-4", children: [(0, jsx_runtime_1.jsx)("div", { className: "w-3 h-3 rounded-full bg-red-500" }), (0, jsx_runtime_1.jsx)("div", { className: "w-3 h-3 rounded-full bg-yellow-500" }), (0, jsx_runtime_1.jsx)("div", { className: "w-3 h-3 rounded-full bg-green-500" })] }), (0, jsx_runtime_1.jsx)("div", { className: "flex-1 bg-white dark:bg-gray-600 rounded-md px-3 py-1 text-xs text-gray-600 dark:text-gray-300 truncate", children: url })] }), (0, jsx_runtime_1.jsx)("div", { className: "relative aspect-[4/3] w-full", children: (0, jsx_runtime_1.jsx)(image_1.default, { src: screenshotUrl, alt: `Screenshot of ${url}`, fill: true, className: "object-cover" }) }), (0, jsx_runtime_1.jsx)("div", { className: "p-3 flex justify-between items-center border-t border-gray-200 dark:border-gray-700", children: (0, jsx_runtime_1.jsx)("div", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Scanned website preview" }) })] }));
+}

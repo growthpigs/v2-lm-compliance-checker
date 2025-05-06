@@ -1,55 +1,86 @@
 # Legal Website Compliance Checker
 
-A tool to scan law firm websites for accessibility and compliance issues.
+A compliance scanning tool for law firm websites that checks for ABA rules compliance, accessibility standards, and more.
 
 ## Features
 
-- Accessibility scanning with AXE Core
-- Jurisdiction detection based on domain
-- Privacy policy compliance checking
-- AI content detection
-- Plagiarism detection
-- Email marketing compliance
+- Free instant legal & accessibility compliance scan
+- AI-powered plagiarism detection
+- Analyzes websites against ABA Model Rules 7.1-7.5
+- Checks for ADA & WCAG accessibility standards
+- Verifies FTC advertising guideline compliance
+- Ensures privacy compliance requirements are met
 
-## Setup Instructions
+## Project Structure
 
-### Prerequisites
+This project is split into two parts:
+1. Frontend - React/Vite application
+2. Backend - Express.js API server
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
+## Deployment
 
-### Installation
+### Frontend Deployment to Vercel
 
-1. Clone the repository
-2. Install dependencies:
+1. Push your code to GitHub
+2. Log in to Vercel and create a new project
+3. Import your GitHub repository
+4. Configure the build settings:
+   - Framework Preset: Vite
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+5. Add Environment Variables:
+   - `VITE_API_URL` - URL of your deployed API
+6. Deploy
+
+The frontend will automatically configure routing to handle all React Router paths.
+
+### API Deployment (Options)
+
+#### Option 1: Render.com or similar service
+Deploy the Express server to a service like Render.com that supports Node.js applications.
+
+#### Option 2: Serverless Functions
+Convert API endpoints to serverless functions if needed.
+
+## Local Development
+
+### Installing Dependencies
 
 ```bash
 npm install
 ```
 
-### Running the Application
+### Running the Development Server
 
-**Single Command (Recommended)**:
-```bash
-npm run dev:all
-```
-This will start both the frontend and backend servers.
-
-**Alternatively, run them separately**:
-
-Start the backend:
-```bash
-npm run start
-```
-
-Start the frontend (in a separate terminal):
 ```bash
 npm run dev
 ```
 
-The application should be accessible at:
-- Frontend: http://localhost:3174
-- Backend API: http://localhost:3000
+This will start the frontend application.
+
+### Running the Backend API Server
+
+```bash
+npm run server
+```
+
+### Running Both Frontend and Backend
+
+```bash
+npm run dev:all
+```
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+## Testing
+
+```bash
+npm run test
+```
 
 ## Troubleshooting
 

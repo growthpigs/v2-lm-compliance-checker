@@ -5,9 +5,92 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Legal Website Compliance Checker</title>
+    <style>
+      .fallback-content {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        margin: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .error-container {
+        color: red;
+        background: #ffeeee;
+        border: 1px solid red;
+        padding: 15px;
+        margin: 15px 0;
+        white-space: pre-wrap;
+      }
+      .hidden {
+        display: none !important;
+      }
+      /* Hide fallback when root has content */
+      #root:not(:empty) ~ .fallback-content {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
+    <!-- Root element must come before fallback for CSS selector to work -->
     <div id="root"></div>
+    
+    <!-- Fallback content that will show if JS fails to load or execute -->
+    <div class="fallback-content">
+      <h2>Legal Website Compliance Checker</h2>
+      <p>If you're seeing this message, there may be an issue loading the application.</p>
+      <div id="error-log" class="error-container" style="display:none;"></div>
+    </div>
+    
+    <script>
+      // Global error handler to catch initialization errors
+      window.addEventListener('error', function(event) {
+        console.error('Global error:', event.error);
+        const errorLog = document.getElementById('error-log');
+        if (errorLog) {
+          errorLog.textContent = 'Application Error: ' + (event.error?.message || event.message || 'Unknown error') + 
+                               '\n\nStack: ' + (event.error?.stack || 'No stack trace available');
+          errorLog.style.display = 'block';
+        }
+      });
+      
+      // Hide fallback when app loads
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded');
+        
+        // Check for React app rendering
+        const checkReactLoaded = () => {
+          const rootElement = document.getElementById('root');
+          if (rootElement && rootElement.children.length > 0) {
+            console.log('React app has mounted content, hiding fallback');
+            const fallback = document.querySelector('.fallback-content');
+            if (fallback) fallback.classList.add('hidden');
+          }
+        };
+        
+        // Check immediately and then periodically
+        checkReactLoaded();
+        const intervalId = setInterval(() => {
+          checkReactLoaded();
+          // Stop checking after 5 seconds
+          setTimeout(() => clearInterval(intervalId), 5000);
+        }, 100);
+      });
+    </script>
+    
+    <!-- Load a minimal test script first to check if basic JS is working -->
+    <script>
+      console.log('Basic script execution test - working');
+      document.querySelector('.fallback-content').innerHTML += '<p>Basic JavaScript is working. If app doesn\'t load, check the console for errors.</p>';
+    </script>
+    
+    <!-- Toggle between main app or simplified version for testing -->
     <script type="module" src="/src/main.tsx"></script>
+    <!-- <script type="module" src="/src/simplified-entry.tsx"></script> -->
+    
+    <div style="margin-top: 40px; padding: 10px; text-align: center; border-top: 1px solid #ddd; display: none;">
+      <p>
+        <a href="/test-page.html" style="color: blue; text-decoration: underline;">View Standalone Test Page</a>
+      </p>
+    </div>
   </body>
 </html> 

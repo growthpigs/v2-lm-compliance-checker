@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import AuroraBackground from "@/polymet/components/aurora-background";
@@ -7,106 +7,109 @@ import BookingForm, {
 } from "@/polymet/components/booking-form";
 
 export default function BookingPage() {
-  // Log that the component is rendering
-  console.log('[DEBUG] BookingPage component rendering');
+  // Enhanced component logging
+  console.log('[DEBUG-BOOKING] BookingPage component initial render');
+  
+  // Add useEffect to track component mounting
+  useEffect(() => {
+    console.log('[DEBUG-BOOKING] BookingPage mounted');
+    
+    // Check if the error message container exists - using textContent instead of :contains
+    const errorElements = Array.from(document.querySelectorAll('div')).filter(el => 
+      el.textContent?.includes('Legal Website Compliance Checker')
+    );
+    console.log('[DEBUG-BOOKING] Error element exists:', errorElements.length > 0);
+    
+    // Log DOM structure
+    console.log('[DEBUG-BOOKING] Root element:', document.getElementById('root'));
+    
+    return () => {
+      console.log('[DEBUG-BOOKING] BookingPage unmounted');
+    };
+  }, []);
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleContinueToForm = () => {
+    console.log('[DEBUG-BOOKING] Continue to form clicked, changing step from 1 to 2');
     setCurrentStep(2);
   };
 
   const handleBackToCalendar = () => {
+    console.log('[DEBUG-BOOKING] Back to calendar clicked, changing step from 2 to 1');
     setCurrentStep(1);
   };
 
   const handleFormSubmit = (formData: BookingFormData) => {
+    console.log('[DEBUG-BOOKING] Form submission started with data:', formData);
     setIsSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      console.log("Booking submitted:", {
-        formData,
-      });
+      console.log('[DEBUG-BOOKING] Form submission completed');
       setIsSubmitting(false);
       setIsSubmitted(true);
     }, 1500);
   };
 
+  console.log('[DEBUG-BOOKING] Current rendering state - step:', currentStep, 'isSubmitting:', isSubmitting, 'isSubmitted:', isSubmitted);
+
   return (
     <AuroraBackground>
-      <div className="container mx-auto px-4 py-8 md:py-12 max-w-none">
-        <div className="flex flex-col lg:flex-row items-start gap-8">
+      {console.log('[DEBUG-BOOKING] Rendering AuroraBackground')}
+      <div className="container mx-auto px-6 md:px-10 py-8 md:py-12 max-w-none">
+        <div className="flex flex-col lg:flex-row items-start gap-12 md:gap-16 lg:gap-20">
           {/* Left side - Moustache Man and Info */}
-          <div className="lg:w-1/2 w-full relative">
+          <div className="lg:w-1/2 w-full relative pl-4 md:pl-6">
             {/* Logo */}
             <div className="mb-6">
               <img
                 src="https://storage.googleapis.com/legal-moustache/Logo Legal Moustache COLOR.svg"
                 alt="Legal Moustache Logo"
                 className="w-auto h-16 md:h-20"
+                onLoad={() => console.log('[DEBUG-BOOKING] Logo image loaded')}
+                onError={(e) => console.error('[DEBUG-BOOKING] Logo image failed to load:', e)}
               />
             </div>
 
-            {/* Heading */}
+            {/* Heading - reduced size */}
             <div className="mb-8 w-full">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 tracking-normal lg:tracking-wide">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-normal lg:tracking-wide">
                 Book Your 20-Minute{" "}
                 <span className="text-white">Free Strategy Call</span>
               </h1>
 
-              {/* Bullet points - smaller on desktop */}
-              <ul className="space-y-3 md:space-y-2 lg:space-y-1 text-white flex flex-col md:flex-row md:space-x-4 md:items-center md:flex-wrap">
-                <li className="flex items-start md:items-center md:w-auto">
-                  <span className="text-green-400 mr-2 flex-shrink-0 mt-1 md:mt-0">
-                    •
-                  </span>
-                  <span className="text-lg md:text-base lg:text-sm">
-                    Get a free SEO audit and AI opinion on your website
-                  </span>
-                </li>
-                <li className="flex items-start md:items-center md:w-auto">
-                  <span className="text-green-400 mr-2 flex-shrink-0 mt-1 md:mt-0">
-                    •
-                  </span>
-                  <span className="text-lg md:text-base lg:text-sm">
-                    Discuss hidden SEO opportunities without pressure
-                  </span>
-                </li>
-                <li className="flex items-start md:items-center md:w-auto">
-                  <span className="text-green-400 mr-2 flex-shrink-0 mt-1 md:mt-0">
-                    •
-                  </span>
-                  <span className="text-lg md:text-base lg:text-sm">
-                    Decide if our Hidden Gems offer is right for you
-                  </span>
-                </li>
-              </ul>
+              {/* Replaced bullet points with descriptive paragraphs */}
+              <div className="text-white space-y-4">
+                <p className="text-lg md:text-base">
+                  Our complimentary strategy session includes a focused SEO audit and AI-powered 
+                  analysis of your law firm's website. We'll identify hidden opportunities that could 
+                  significantly improve your online visibility and client acquisition.
+                </p>
+                <p className="text-lg md:text-base">
+                  This no-pressure conversation helps you understand your website's potential and 
+                  whether our specialized services are the right fit for your firm's growth objectives.
+                  Schedule your call today to start improving your digital presence.
+                </p>
+              </div>
             </div>
 
-            {/* Moustache Man Image with Badge - moved up */}
+            {/* Moustache Man Image with repositioned banner */}
             <div className="relative md:max-w-none mt-0 md:-mt-4 lg:-mt-8">
-              {/* Gem positioned behind the head */}
-              <div className="absolute top-0 right-0 transform rotate-12 z-0">
-                <img
-                  src="https://storage.googleapis.com/legal-moustache/250-hidden-gem-icon.png"
-                  alt="Pink Gem"
-                  className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 opacity-90"
-                />
-              </div>
-
               {/* Moustache Man image */}
               <img
                 src="https://storage.googleapis.com/legal-moustache/moustache-man.png"
                 alt="Legal Moustache Expert"
                 className="relative z-10 max-h-[400px] md:max-h-[500px] lg:max-h-[600px] w-auto object-contain"
+                onLoad={() => console.log('[DEBUG-BOOKING] Moustache man image loaded')}
+                onError={(e) => console.error('[DEBUG-BOOKING] Moustache man image failed to load:', e)}
               />
 
-              {/* Green pill badge positioned at the bottom of the moustache man */}
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 w-[120%]">
-                <div className="bg-green-500 text-white font-bold text-xs md:text-sm lg:text-base xl:text-lg px-6 py-2.5 rounded-full whitespace-nowrap md:tracking-wider lg:tracking-widest flex justify-center items-center w-full">
+              {/* Green square banner positioned to cover only 3/5 of the column from the left */}
+              <div className="absolute bottom-0 left-0 w-3/5 z-20">
+                <div className="bg-green-500 text-white font-bold text-sm md:text-base px-4 py-2 flex justify-center items-center w-full">
                   DOUBLE YOUR TRAFFIC OR IT'S FREE
                 </div>
               </div>
@@ -115,6 +118,7 @@ export default function BookingPage() {
 
           {/* Right side - Booking Form */}
           <div className="lg:w-1/2 w-full">
+            {console.log('[DEBUG-BOOKING] Rendering right side booking form, currentStep:', currentStep)}
             <Card className="w-full bg-white dark:bg-gray-800 shadow-lg">
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-6">
@@ -123,6 +127,7 @@ export default function BookingPage() {
 
                 {currentStep === 1 ? (
                   <div className="space-y-8">
+                    {console.log('[DEBUG-BOOKING] Rendering TidyCal embed')}
                     {/* TidyCal Embed */}
                     <div className="w-full min-h-[400px] rounded-lg overflow-hidden">
                       <iframe
@@ -132,6 +137,8 @@ export default function BookingPage() {
                         frameBorder="0"
                         style={{ minHeight: "400px" }}
                         title="Schedule Appointment"
+                        onLoad={() => console.log('[DEBUG-BOOKING] TidyCal iframe loaded')}
+                        onError={(e) => console.error('[DEBUG-BOOKING] TidyCal iframe failed to load:', e)}
                       ></iframe>
                     </div>
 
@@ -144,6 +151,7 @@ export default function BookingPage() {
                   </div>
                 ) : (
                   <div>
+                    {console.log('[DEBUG-BOOKING] Rendering form step')}
                     {!isSubmitted && (
                       <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                         <h3 className="font-medium mb-1">Selected Time</h3>
