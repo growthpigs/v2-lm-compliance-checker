@@ -32,32 +32,64 @@ function LandingPage() {
         setIsLoading(true);
         setError(null);
         try {
-            console.log("[DEBUG] Sending API request to start scan");
-            // Use the API service we set up
-            const response = await fetch('/api/v1/scans', {
+            console.log(`[DEBUG] Submitting scan for URL: ${formattedUrl}`);
+            
+            // Log API base URL
+            const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+            console.log(`[DEBUG] API base URL: ${apiBaseUrl}`);
+            
+            // Using relative or absolute URL based on environment
+            const fetchUrl = apiBaseUrl ? `${apiBaseUrl}/api/v1/scans` : '/api/v1/scans';
+            console.log(`[DEBUG] Fetch URL: ${fetchUrl}`);
+            
+            // Make the POST request to start scan
+            const response = await fetch(fetchUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ url: formattedUrl }),
             });
-            console.log(`[DEBUG] API response status: ${response.status}`);
+            
+            console.log(`[DEBUG] Scan response status: ${response.status}`);
+            
+            // Handle non-OK responses
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to start scan');
+                const errorText = await response.text();
+                console.error(`[ERROR] Scan request failed: ${errorText}`);
+                throw new Error(`Scan request failed: ${response.status} ${errorText}`);
             }
-            const data = await response.json();
-            console.log(`[DEBUG] Scan started with ID: ${data.scanId}`);
+            
+            // Parse response JSON
+            let data;
+            try {
+                data = await response.json();
+                console.log(`[DEBUG] Scan response data:`, data);
+            } catch (jsonError) {
+                console.error(`[ERROR] Failed to parse response JSON:`, jsonError);
+                throw new Error('Invalid response from server');
+            }
+            
+            // Make sure we have a scanId
+            if (!data.id && !data.scanId) {
+                console.error(`[ERROR] No scan ID in response:`, data);
+                throw new Error('No scan ID received from server');
+            }
+            
+            // Extract scan ID (handle both formats)
+            const scanId = data.scanId || data.id;
+            console.log(`[DEBUG] Started scan with ID: ${scanId}`);
+            
             // Store scanId in sessionStorage for the loading page to use
-            sessionStorage.setItem('currentScanId', data.scanId);
+            sessionStorage.setItem('currentScanId', scanId);
             sessionStorage.setItem('currentScanUrl', formattedUrl);
             // Navigate to the loading page with URL as query parameter
             console.log('[DEBUG] Navigating to loading page');
-            navigate(`/scan-loading?url=${encodeURIComponent(formattedUrl)}`);
+            navigate(`/scan-loading?id=${scanId}`);
         }
         catch (error) {
-            console.error('[ERROR] Scan failed:', error);
-            setError(error instanceof Error ? error.message : 'Failed to start scan');
+            console.error('[ERROR] Error starting scan:', error);
+            setError(error.message || 'Failed to start scan. Please try again.');
         }
         finally {
             setIsLoading(false);
