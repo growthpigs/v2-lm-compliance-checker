@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Debug Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .error {
+      color: red;
+      background-color: #ffeeee;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid red;
+    }
+    .success {
+      color: green;
+      background-color: #eeffee;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid green;
+    }
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .status-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .status-box {
+      flex: 0 0 48%;
+      margin-bottom: 15px;
+    }
+    #error-log {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #f5f5f5;
+    }
+    .url-input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+  </style>
+  <!-- API Fix Script - Add before other scripts -->
+  <script src="/fixapi.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>API Debug Tool</h1>
+    
+    <div class="card">
+      <h2>API Fix Script Status</h2>
+      <div id="fixapi-status">Checking...</div>
+      <button onclick="checkFixApiStatus()">Check Status</button>
+    </div>
+    
+    <div class="card">
+      <h2>Test API Endpoints</h2>
+      <p>Test various API endpoints to see how they are handled:</p>
+      
+      <div>
+        <label for="custom-url">Custom URL:</label>
+        <input type="text" id="custom-url" class="url-input" value="/api/scans/test123" placeholder="Enter URL to test">
+      </div>
+      
+      <button onclick="testEndpoint('direct')">Test Quick-Fix Directly</button>
+      <button onclick="testEndpoint('standard')">Test Standard Endpoint</button>
+      <button onclick="testEndpoint('custom')">Test Custom URL</button>
+      <button onclick="testEndpoint('force-error')">Force Error</button>
+      
+      <div id="api-test-result" style="margin-top: 15px;"></div>
+    </div>
+    
+    <div class="card">
+      <h2>Network Analysis</h2>
+      <div class="status-container">
+        <div class="status-box">
+          <h3>Request Headers</h3>
+          <pre id="request-headers">No data yet</pre>
+        </div>
+        <div class="status-box">
+          <h3>Response Headers</h3>
+          <pre id="response-headers">No data yet</pre>
+        </div>
+        <div class="status-box">
+          <h3>Request Info</h3>
+          <pre id="request-info">No data yet</pre>
+        </div>
+        <div class="status-box">
+          <h3>Response Info</h3>
+          <pre id="response-info">No data yet</pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>API Fix Statistics</h2>
+      <pre id="fixapi-stats">No data yet</pre>
+    </div>
+    
+    <div class="card">
+      <h2>Error Log</h2>
+      <div id="error-log">No errors logged yet</div>
+    </div>
+  </div>
+
+  <script>
+    // Check API Fix script status
+    function checkFixApiStatus() {
+      const statusEl = document.getElementById('fixapi-status');
+      if (window.__apiFixLoaded) {
+        statusEl.innerHTML = `<div class="success">API Fix Script is loaded and initialized: ${window.__apiFixInitialized}</div>`;
+        
+        // Update stats
+        const statsEl = document.getElementById('fixapi-stats');
+        if (window.__apiFixStatus) {
+          statsEl.textContent = JSON.stringify(window.__apiFixStatus(), null, 2);
+        } else {
+          statsEl.textContent = "API Fix script loaded but __apiFixStatus not available";
+        }
+      } else {
+        statusEl.innerHTML = '<div class="error">API Fix Script is NOT loaded!</div>';
+      }
+    }
+    
+    // Test API endpoints
+    async function testEndpoint(type) {
+      const resultEl = document.getElementById('api-test-result');
+      const requestHeadersEl = document.getElementById('request-headers');
+      const responseHeadersEl = document.getElementById('response-headers');
+      const requestInfoEl = document.getElementById('request-info');
+      const responseInfoEl = document.getElementById('response-info');
+      
+      resultEl.innerHTML = '<div>Testing endpoint...</div>';
+      
+      let url = '';
+      let options = {};
+      
+      switch (type) {
+        case 'direct':
+          url = '/api/quick-fix?id=test123&direct=true';
+          break;
+        case 'standard':
+          url = '/api/scans/test123';
+          break;
+        case 'custom':
+          url = document.getElementById('custom-url').value || '/api/scans/test123';
+          break;
+        case 'force-error':
+          url = '/api/non-existent-endpoint';
+          break;
+      }
+      
+      // Build request options
+      options = {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'X-API-Debug': 'true',
+          'X-Test-Type': type
+        }
+      };
+      
+      // Display request info
+      requestInfoEl.textContent = JSON.stringify({
+        url: url,
+        options: options
+      }, null, 2);
+      
+      requestHeadersEl.textContent = JSON.stringify(options.headers, null, 2);
+      
+      try {
+        // Log to error-log
+        logToErrorLog(`Testing endpoint: ${url} (${type})`);
+        
+        // Make the request
+        const startTime = Date.now();
+        const response = await fetch(url, options);
+        const endTime = Date.now();
+        
+        // Display response headers
+        const headers = {};
+        response.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+        responseHeadersEl.textContent = JSON.stringify(headers, null, 2);
+        
+        // Display response info
+        const responseInfo = {
+          status: response.status,
+          statusText: response.statusText,
+          type: response.type,
+          url: response.url,
+          redirected: response.redirected,
+          time: `${endTime - startTime}ms`
+        };
+        responseInfoEl.textContent = JSON.stringify(responseInfo, null, 2);
+        
+        // Get and display the response text
+        const text = await response.text();
+        
+        // Try to parse as JSON
+        try {
+          const json = JSON.parse(text);
+          resultEl.innerHTML = `
+            <div class="success">Success! Response received (${text.length} bytes)</div>
+            <pre>${JSON.stringify(json, null, 2)}</pre>
+          `;
+          logToErrorLog(`Success response from ${url}: ${JSON.stringify(json).substring(0, 100)}...`);
+        } catch (parseError) {
+          // Check if HTML
+          if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+            resultEl.innerHTML = `
+              <div class="error">Received HTML instead of JSON (${text.length} bytes)</div>
+              <pre>${text.substring(0, 300)}...</pre>
+            `;
+            logToErrorLog(`Error: Received HTML from ${url}`);
+          } else {
+            resultEl.innerHTML = `
+              <div class="error">Invalid JSON response (${text.length} bytes)</div>
+              <pre>${text}</pre>
+            `;
+            logToErrorLog(`Error: Invalid JSON from ${url}: ${text.substring(0, 100)}`);
+          }
+        }
+        
+      } catch (error) {
+        resultEl.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        responseInfoEl.textContent = JSON.stringify({
+          error: error.message,
+          stack: error.stack
+        }, null, 2);
+        logToErrorLog(`Fetch error for ${url}: ${error.message}`);
+      }
+      
+      // Update API Fix stats after test
+      if (window.__apiFixStatus) {
+        document.getElementById('fixapi-stats').textContent = 
+          JSON.stringify(window.__apiFixStatus(), null, 2);
+      }
+    }
+    
+    function logToErrorLog(message) {
+      const errorLog = document.getElementById('error-log');
+      const entry = document.createElement('div');
+      entry.textContent = `${new Date().toISOString()} - ${message}`;
+      errorLog.appendChild(entry);
+      errorLog.scrollTop = errorLog.scrollHeight;
+    }
+    
+    // Initialize the page
+    window.addEventListener('DOMContentLoaded', () => {
+      logToErrorLog('Page loaded, checking API Fix status...');
+      
+      // Check if API Fix script is loaded
+      setTimeout(() => {
+        checkFixApiStatus();
+        
+        // Log information about the environment
+        logToErrorLog(`Page URL: ${window.location.href}`);
+        logToErrorLog(`User Agent: ${navigator.userAgent}`);
+      }, 500);
+    });
+  </script>
+</body>
+</html> 

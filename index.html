@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- API Fix Script - Load this FIRST before anything else -->
+    <script src="/fixapi.js"></script>
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Legal Website Compliance Checker</title>
@@ -28,7 +30,31 @@
       #root:not(:empty) ~ .fallback-content {
         display: none !important;
       }
+      .test-links {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .test-links a {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 8px 15px;
+        background: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      .test-links a:hover {
+        background: #e0e0e0;
+      }
     </style>
+    <script>
+      // Check and report API Fix status early
+      console.log('[INDEX] API Fix Script status:', window.__apiFixLoaded ? 'Loaded' : 'Not loaded');
+      if (window.__apiFixStatus) {
+        console.log('[INDEX] API Fix script initialized:', window.__apiFixInitialized);
+      }
+    </script>
   </head>
   <body>
     <!-- Root element must come before fallback for CSS selector to work -->
@@ -39,6 +65,13 @@
       <h2>Legal Website Compliance Checker</h2>
       <p>If you're seeing this message, there may be an issue loading the application.</p>
       <div id="error-log" class="error-container" style="display:none;"></div>
+      
+      <div class="test-links">
+        <a href="/test-page.html">View Standalone Test Page</a>
+        <a href="/api-test.html">API Connection Test</a>
+        <a href="/api-debug.html">API Debug Tool</a>
+        <a href="/api/quick-fix?id=test123" target="_blank">Test Direct API</a>
+      </div>
     </div>
     
     <script>
@@ -56,6 +89,11 @@
       // Hide fallback when app loads
       document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM fully loaded');
+        
+        // Report API Fix status
+        if (window.__apiFixStatus) {
+          console.log('[INDEX] API Fix status after DOM load:', window.__apiFixStatus());
+        }
         
         // Check for React app rendering
         const checkReactLoaded = () => {
@@ -87,10 +125,11 @@
     <script type="module" src="/src/main.tsx"></script>
     <!-- <script type="module" src="/src/simplified-entry.tsx"></script> -->
     
-    <div style="margin-top: 40px; padding: 10px; text-align: center; border-top: 1px solid #ddd; display: none;">
-      <p>
-        <a href="/test-page.html" style="color: blue; text-decoration: underline;">View Standalone Test Page</a>
-      </p>
+    <div class="test-links" style="margin-top: 40px; padding: 10px; text-align: center; border-top: 1px solid #ddd;">
+      <a href="/test-page.html">View Standalone Test Page</a>
+      <a href="/api-test.html">API Connection Test</a>
+      <a href="/api-debug.html">API Debug Tool</a>
+      <a href="/api/quick-fix?id=test123" target="_blank">Test Direct API</a>
     </div>
   </body>
 </html> 

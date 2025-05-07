@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Connection Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    h1 {
+      color: #0066cc;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #004499;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .panel {
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Connection Test</h1>
+  
+  <div class="panel">
+    <h2>Environment Information</h2>
+    <p>Current URL: <span id="current-url"></span></p>
+    <p>Origin: <span id="origin"></span></p>
+  </div>
+
+  <div class="panel">
+    <h2>Test API Endpoints</h2>
+    <button onclick="testDebugEndpoint()">Test Debug Endpoint</button>
+    <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+    <button onclick="testV1ApiEndpoint()">Test V1 API Base</button>
+    <button onclick="testScanEndpoint()">Test Scan Endpoint</button>
+    <button onclick="testDirectScanEndpoint()">Test Direct Scan Endpoint</button>
+    <button onclick="testScanProxyEndpoint()">Test Scan Proxy</button>
+    <button onclick="testForceJsonEndpoint()">Test Force-JSON</button>
+  </div>
+
+  <div class="panel">
+    <h2>Results</h2>
+    <pre id="results">Results will appear here.</pre>
+  </div>
+
+  <script>
+    // Display environment info
+    document.getElementById('current-url').textContent = window.location.href;
+    document.getElementById('origin').textContent = window.location.origin;
+
+    // Helper function to log results
+    function logResult(message, isError = false) {
+      const resultsEl = document.getElementById('results');
+      const timestamp = new Date().toISOString();
+      
+      if (isError) {
+        resultsEl.innerHTML += `<span class="error">[${timestamp}] ERROR: ${message}</span>\n`;
+      } else {
+        resultsEl.innerHTML += `<span class="success">[${timestamp}] ${message}</span>\n`;
+      }
+      
+      // Auto-scroll to bottom
+      resultsEl.scrollTop = resultsEl.scrollHeight;
+    }
+
+    // Test debug endpoint
+    async function testDebugEndpoint() {
+      logResult('Testing debug endpoint...');
+      
+      try {
+        // First, try relative path
+        const relativePath = '/api/debug';
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logResult(`Debug endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Debug endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/debug`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          logResult(`Status: ${originResponse.status}`);
+          
+          if (originResponse.ok) {
+            const data = await originResponse.json();
+            logResult(`Origin debug endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin debug endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test health endpoint
+    async function testHealthEndpoint() {
+      logResult('Testing health endpoint...');
+      
+      try {
+        const relativePath = '/api/health';
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logResult(`Health endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Health endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/health`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const data = await originResponse.json();
+            logResult(`Origin health endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin health endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test V1 API base endpoint
+    async function testV1ApiEndpoint() {
+      logResult('Testing V1 API base endpoint...');
+      
+      try {
+        const relativePath = '/api/v1';
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logResult(`V1 API base endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`V1 API base endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/v1`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const data = await originResponse.json();
+            logResult(`Origin V1 API base endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin V1 API base endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test scan endpoint
+    async function testScanEndpoint() {
+      logResult('Testing scan endpoint...');
+      
+      // Use a test scan ID
+      const testScanId = 'test123';
+      
+      try {
+        const relativePath = `/api/v1/scans/${testScanId}`;
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logResult(`Scan endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Scan endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/v1/scans/${testScanId}`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const data = await originResponse.json();
+            logResult(`Origin scan endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin scan endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test direct scan endpoint (without nested path)
+    async function testDirectScanEndpoint() {
+      logResult('Testing direct scan endpoint...');
+      
+      // Use a test scan ID
+      const testScanId = 'test123';
+      
+      try {
+        const relativePath = `/api/scan-direct?id=${testScanId}`;
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logResult(`Direct scan endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Direct scan endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/scan-direct?id=${testScanId}`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const data = await originResponse.json();
+            logResult(`Origin direct scan endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin direct scan endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test scan proxy endpoint 
+    async function testScanProxyEndpoint() {
+      logResult('Testing scan proxy endpoint...');
+      
+      // Use a test scan ID
+      const testScanId = 'test123';
+      
+      try {
+        const relativePath = `/api/scan-proxy?id=${testScanId}`;
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const responseText = await response.text();
+          // Check if we got HTML instead of JSON
+          if (responseText.trim().startsWith('<!DOCTYPE')) {
+            logResult(`Error: Received HTML instead of JSON:`, true);
+            logResult(responseText.substring(0, 100) + '...', true);
+          } else {
+            try {
+              const data = JSON.parse(responseText);
+              logResult(`Scan proxy endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+            } catch (jsonError) {
+              logResult(`Error parsing JSON: ${jsonError.message}`, true);
+              logResult(`Raw response: ${responseText.substring(0, 500)}...`, true);
+            }
+          }
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Scan proxy endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/scan-proxy?id=${testScanId}`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const responseText = await originResponse.text();
+            // Check if we got HTML instead of JSON
+            if (responseText.trim().startsWith('<!DOCTYPE')) {
+              logResult(`Error: Received HTML instead of JSON:`, true);
+              logResult(responseText.substring(0, 100) + '...', true);
+            } else {
+              try {
+                const data = JSON.parse(responseText);
+                logResult(`Origin scan proxy endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+              } catch (jsonError) {
+                logResult(`Error parsing JSON: ${jsonError.message}`, true);
+                logResult(`Raw response: ${responseText.substring(0, 500)}...`, true);
+              }
+            }
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin scan proxy endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+
+    // Test force-json endpoint (most reliable)
+    async function testForceJsonEndpoint() {
+      logResult('Testing force-json endpoint...');
+      
+      // Use a test scan ID and the scan operation
+      const testScanId = 'test123';
+      
+      try {
+        const relativePath = `/api/force-json?op=scan&id=${testScanId}`;
+        logResult(`Requesting ${relativePath}`);
+        
+        const response = await fetch(relativePath, {
+          method: 'GET',
+          headers: { 
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        logResult(`Status: ${response.status}`);
+        
+        if (response.ok) {
+          const responseText = await response.text();
+          // Check if we got HTML instead of JSON
+          if (responseText.trim().startsWith('<!DOCTYPE')) {
+            logResult(`Error: Received HTML instead of JSON:`, true);
+            logResult(responseText.substring(0, 100) + '...', true);
+          } else {
+            try {
+              const data = JSON.parse(responseText);
+              logResult(`Force-JSON endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+            } catch (jsonError) {
+              logResult(`Error parsing JSON: ${jsonError.message}`, true);
+              logResult(`Raw response: ${responseText.substring(0, 500)}...`, true);
+            }
+          }
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        logResult(`Force-JSON endpoint failed: ${error.message}`, true);
+        
+        // Try with origin
+        try {
+          const originPath = `${window.location.origin}/api/force-json?op=scan&id=${testScanId}`;
+          logResult(`Trying with origin: ${originPath}`);
+          
+          const originResponse = await fetch(originPath, {
+            method: 'GET',
+            headers: { 
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (originResponse.ok) {
+            const responseText = await originResponse.text();
+            // Check if we got HTML instead of JSON
+            if (responseText.trim().startsWith('<!DOCTYPE')) {
+              logResult(`Error: Received HTML instead of JSON:`, true);
+              logResult(responseText.substring(0, 100) + '...', true);
+            } else {
+              try {
+                const data = JSON.parse(responseText);
+                logResult(`Origin force-JSON endpoint success! Data: ${JSON.stringify(data, null, 2)}`);
+              } catch (jsonError) {
+                logResult(`Error parsing JSON: ${jsonError.message}`, true);
+                logResult(`Raw response: ${responseText.substring(0, 500)}...`, true);
+              }
+            }
+          } else {
+            throw new Error(`HTTP error: ${originResponse.status}`);
+          }
+        } catch (originError) {
+          logResult(`Origin force-JSON endpoint failed: ${originError.message}`, true);
+        }
+      }
+    }
+  </script>
+</body>
+</html> 
